@@ -19,6 +19,7 @@ use bifurcata::continuation::ContinuationOptions;
 use bifurcata::models::{BUILTIN_MODELS, builtin_start_point, create_builtin, find_builtin};
 use bifurcata::problem::BifurcationProblem;
 use bifurcata::run::*;
+use bifurcata::runspec::RunSpec;
 use bifurcata::serialise::*;
 
 fn usage() -> ExitCode {
@@ -103,6 +104,8 @@ struct ResolvedModel {
     source: String,
     default_parameter: Option<String>,
     default_range: Option<(f64, f64)>,
+    /// The model's own `[bifurcation]` block (empty for a built-in).
+    spec: RunSpec,
     /// The starting equilibrium at given parameter values.
     start: StartPoint,
 }
@@ -121,6 +124,7 @@ fn resolve_model(spec: &str) -> Result<ResolvedModel, String> {
             source: format!("builtin:{name}"),
             default_parameter: Some(info.default_parameter.to_owned()),
             default_range: Some(info.default_range),
+            spec: RunSpec::default(),
             start: Box::new(move |lambda| builtin_start_point(name, lambda).ok_or_else(|| format!("no analytic starting point for \"{name}\""))),
         });
     }
@@ -135,13 +139,15 @@ fn antimony_model(path: &str) -> Result<ResolvedModel, String> {
     let lambda0 = problem.parameter_values();
     let solver = AntimonyProblem::parse(&text)?;
     let name = std::path::Path::new(path).file_stem().map_or_else(|| path.to_owned(), |s| s.to_string_lossy().into_owned());
+    let spec = RunSpec::parse(&text);
     Ok(ResolvedModel {
         problem: Box::new(problem),
         lambda0,
         name,
         source: path.to_owned(),
-        default_parameter: None,
-        default_range: None,
+        default_parameter: spec.parameter.clone(),
+        default_range: spec.range,
+        spec,
         start: Box::new(move |lambda| solver.find_steady_state(lambda)),
     })
 }
@@ -277,6 +283,11 @@ fn run_command(args: &[String]) -> ExitCode {
 
     // Precedence, weakest first: defaults, a settings file, then flags.
     let mut options = ContinuationOptions::default();
+    if model.spec.found {
+        eprintln!("the model carries a [bifurcation] block");
+        model.spec.unknown_keys.iter().for_each(|k| eprintln!("warning: [bifurcation] key \"{k}\" is not recognised"));
+    }
+    model.spec.apply_to(&mut options);
     if let Some(path) = &a.settings {
         match read(path).and_then(|t| apply_options_json(&t, &mut options)) {
             Ok(unknown) => unknown.iter().for_each(|k| eprintln!("warning: settings key \"{k}\" is not recognised")),

@@ -28,6 +28,7 @@ pub mod models;
 pub mod newton;
 pub mod problem;
 pub mod run;
+pub mod runspec;
 pub mod serialise;
 pub mod test_problems;
 pub mod types;

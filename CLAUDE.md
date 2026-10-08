@@ -45,6 +45,9 @@ name `bifurcata`. https://github.com/sys-bio/bifurcata-rs
 - `src/run.rs` — an equilibrium run as the harness does it (both directions,
   exit codes); `src/models.rs` — the built-in models;
   `src/bin/bifurcata.rs` — the console harness (`run`, `compare`, `models`).
+- `src/runspec.rs` — `RunSpec`, the `[bifurcation]` block a model carries in a
+  comment (parameter, range, ds, dsMax, maxSteps, plot); the harness and
+  websim's Bifurcation view both apply it.
 - `src/antimony.rs` (feature `antimony`) — `AntimonyProblem` over websim's
   model crate (git dependency): reduced state, conserved totals as `_CSUM0…`.
 - `tests/` — one file per ported Delphi suite (`stage0`, `newton`,
@@ -98,9 +101,8 @@ name `bifurcata`. https://github.com/sys-bio/bifurcata-rs
 - **Normal forms are M3**: every record has confidence `spectrum`, so compare
   against Delphi baselines with `compare_normal_forms: false`
   (`--locations-only`).
-- **The `[bifurcation]` block in `.ant` files is not read yet**, nor is
-  `--trace` implemented; the baseline tests take their options from the
-  baseline's own `run.options`.
+- **`--trace` is not implemented.** The baseline tests take their options
+  from the baseline's own `run.options`, not from the model's block.
 
 ## Next session
 
