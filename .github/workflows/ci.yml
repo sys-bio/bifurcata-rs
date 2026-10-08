@@ -1,0 +1,30 @@
+# Tests, lints and the browser build, on every push and pull request.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust, with clippy and the WebAssembly target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Tests
+        run: cargo test --all-targets
+
+      - name: Clippy (warnings are errors)
+        run: cargo clippy --all-targets -- -D warnings
+
+      # The library must stay pure Rust so it runs in the browser.
+      - name: WebAssembly build
+        run: cargo check --target wasm32-unknown-unknown
