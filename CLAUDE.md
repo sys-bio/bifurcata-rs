@@ -78,6 +78,10 @@ name `bifurcata`. https://github.com/sys-bio/bifurcata-rs
   after a mutation run, `cargo build` before running `target/debug/bifurcata`.
   Both bit in M2 and produced convincing wrong numbers.
 - **The source code is not rustfmt-formatted**; match the surrounding style.
+- **Line endings are LF.** Python on Windows writes CRLF in text mode (the M2
+  commit needed a follow-up for it): write bytes, or check `git diff --stat`.
+- **websim uses this crate** (git dependency, feature `antimony`) for its
+  Bifurcation view, so a change here reaches the app once it is pushed.
 
 ## Numerical facts (M2)
 
