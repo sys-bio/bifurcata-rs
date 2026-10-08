@@ -53,6 +53,11 @@ name `bifurcata`. https://github.com/sys-bio/bifurcata-rs
   targets (closed forms, published values) over comparing two runs. Watch for
   vacuous checks.
 
+## Next session
+
+**Start with `docs/m2-briefing.md`**: the goal, reading list, tests to port,
+defaults, decisions (settled and to make), baselines and an ordered plan for M2.
+
 ## Progress
 
 **M1 done** (October 2026): Stage 0 ported (8 suites, all passing; mutation-
