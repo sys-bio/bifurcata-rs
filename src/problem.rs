@@ -41,6 +41,56 @@ pub trait BifurcationProblem {
     }
 }
 
+/// A reference to a problem is a problem, so a defining system can borrow one.
+/// Every method forwards, overrides included.
+impl<T: BifurcationProblem + ?Sized> BifurcationProblem for &T {
+    fn state_dim(&self) -> usize {
+        (**self).state_dim()
+    }
+    fn parameter_count(&self) -> usize {
+        (**self).parameter_count()
+    }
+    fn residual(&self, u: &[f64], lambda: &[f64], r: &mut [f64]) {
+        (**self).residual(u, lambda, r)
+    }
+    fn jacobian(&self, u: &[f64], lambda: &[f64], j: &mut Matrix) {
+        (**self).jacobian(u, lambda, j)
+    }
+    fn parameter_derivative(&self, u: &[f64], lambda: &[f64], k: usize, out: &mut [f64]) {
+        (**self).parameter_derivative(u, lambda, k, out)
+    }
+    fn state_name(&self, i: usize) -> String {
+        (**self).state_name(i)
+    }
+    fn parameter_name(&self, k: usize) -> String {
+        (**self).parameter_name(k)
+    }
+}
+
+impl<T: BifurcationProblem + ?Sized> BifurcationProblem for Box<T> {
+    fn state_dim(&self) -> usize {
+        (**self).state_dim()
+    }
+    fn parameter_count(&self) -> usize {
+        (**self).parameter_count()
+    }
+    fn residual(&self, u: &[f64], lambda: &[f64], r: &mut [f64]) {
+        (**self).residual(u, lambda, r)
+    }
+    fn jacobian(&self, u: &[f64], lambda: &[f64], j: &mut Matrix) {
+        (**self).jacobian(u, lambda, j)
+    }
+    fn parameter_derivative(&self, u: &[f64], lambda: &[f64], k: usize, out: &mut [f64]) {
+        (**self).parameter_derivative(u, lambda, k, out)
+    }
+    fn state_name(&self, i: usize) -> String {
+        (**self).state_name(i)
+    }
+    fn parameter_name(&self, k: usize) -> String {
+        (**self).parameter_name(k)
+    }
+}
+
 /// `∂F/∂λ_k` by central differences, with a step relative to `λ_k` (absolute
 /// where it passes through zero, or the step would vanish with it). Usable
 /// whether or not a problem overrides [`BifurcationProblem::parameter_derivative`],

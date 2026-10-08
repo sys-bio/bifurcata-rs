@@ -9,13 +9,25 @@
 //! what the library does) and checked against its tests and baselines. Pure
 //! Rust, so that it runs in the browser as well as on the desktop.
 //!
-//! This is milestone M1: the foundations — types, complex arithmetic, dense
-//! linear algebra, the bordered solver, the problem contract and test problems.
+//! Milestones M1–M2: the foundations (types, complex arithmetic, dense linear
+//! algebra, the bordered solver, the problem contract, test problems), then
+//! Newton, pseudo-arclength continuation of equilibria with fold, branch-point
+//! and Hopf detection, the `bifurcata/1` output schema and its comparator, and
+//! (feature `antimony`) Antimony models through websim's model crate.
 
+#[cfg(feature = "antimony")]
+pub mod antimony;
+pub mod bialternate;
 pub mod bordered;
 pub mod complex;
+pub mod continuation;
+pub mod equilibrium;
 pub mod linalg;
 pub mod matrix;
+pub mod models;
+pub mod newton;
 pub mod problem;
+pub mod run;
+pub mod serialise;
 pub mod test_problems;
 pub mod types;

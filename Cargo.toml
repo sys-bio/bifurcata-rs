@@ -5,3 +5,12 @@ edition = "2024"
 
 [dependencies]
 faer = { version = "0.24", default-features = false, features = ["std"] }
+# The bifurcata/1 schema. preserve_order writes keys in the schema's order;
+# float_roundtrip makes the parser correctly rounded, so a round trip is exact.
+serde_json = { version = "1.0.151", features = ["preserve_order", "float_roundtrip"] }
+# Antimony models through websim's model crate (cargo finds the package inside
+# the websim workspace). Optional: the core library has no model backend.
+websim-model = { git = "https://github.com/sys-bio/websim", optional = true }
+
+[features]
+antimony = ["dep:websim-model"]

@@ -275,6 +275,78 @@ impl BifurcationProblem for TranscriticalProblem {
     }
 }
 
+/// A **neutral saddle** on a trivial branch: `du₀/dt = λu₀ − u₀²`,
+/// `du₁/dt = −u₁`. On u = 0 the Jacobian is diag(λ, −1), so at λ = 1 the real
+/// eigenvalues +1 and −1 sum to zero: the bialternate determinant vanishes
+/// there, yet nothing bifurcates. A continuation through it must record a
+/// `NeutralSaddle`, never a Hopf — PP2's trivial branch has the same structure
+/// at p1 = 0.4. (λ = 0 is a branch point, as for [`TranscriticalProblem`].)
+pub struct NeutralSaddleProblem;
+
+impl BifurcationProblem for NeutralSaddleProblem {
+    fn state_dim(&self) -> usize {
+        2
+    }
+    fn parameter_count(&self) -> usize {
+        1
+    }
+    fn residual(&self, u: &[f64], lambda: &[f64], r: &mut [f64]) {
+        r[0] = lambda[0] * u[0] - u[0] * u[0];
+        r[1] = -u[1];
+    }
+    fn jacobian(&self, u: &[f64], lambda: &[f64], j: &mut Matrix) {
+        j.resize_zeroed(2, 2);
+        j[(0, 0)] = lambda[0] - 2.0 * u[0];
+        j[(1, 1)] = -1.0;
+    }
+}
+
+/// The selkov model of glycolysis in its two-variable form (§11.2):
+///
+/// ```text
+/// dS/dt = v0 − S P²
+/// dP/dt = S P² − k P
+/// ```
+///
+/// Equilibrium P* = v0/k, S* = k²/v0; a Hopf at v0 = k^(3/2) with ω = k.
+/// Parameters are [v0, k]. A built-in model of the Delphi harness.
+pub struct Selkov;
+
+impl Selkov {
+    pub fn equilibrium(v0: f64, k: f64) -> [f64; 2] {
+        let p = v0 / k;
+        [v0 / (p * p), p]
+    }
+}
+
+impl BifurcationProblem for Selkov {
+    fn state_dim(&self) -> usize {
+        2
+    }
+    fn parameter_count(&self) -> usize {
+        2
+    }
+    fn residual(&self, u: &[f64], lambda: &[f64], r: &mut [f64]) {
+        let (s, p, v0, k) = (u[0], u[1], lambda[0], lambda[1]);
+        r[0] = v0 - s * p * p;
+        r[1] = s * p * p - k * p;
+    }
+    fn jacobian(&self, u: &[f64], lambda: &[f64], j: &mut Matrix) {
+        let (s, p, k) = (u[0], u[1], lambda[1]);
+        j.resize_zeroed(2, 2);
+        j[(0, 0)] = -p * p;
+        j[(0, 1)] = -2.0 * s * p;
+        j[(1, 0)] = p * p;
+        j[(1, 1)] = 2.0 * s * p - k;
+    }
+    fn state_name(&self, i: usize) -> String {
+        ["S", "P"][i].to_owned()
+    }
+    fn parameter_name(&self, k: usize) -> String {
+        ["v0", "k"][k].to_owned()
+    }
+}
+
 /// The textbook line-search case, `du/dt = arctan(u − λ)`. Undamped Newton
 /// diverges from any |u − λ| above about 1.39 (each step overshoots further);
 /// with Armijo backtracking it converges. Success and failure differ by the

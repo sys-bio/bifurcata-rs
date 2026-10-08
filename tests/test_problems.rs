@@ -50,6 +50,8 @@ fn analytic_jacobians_match_finite_differences() {
     check_jacobian(&ArctanProblem, &[2.0], &[0.5], "arctan");
     check_jacobian(&SingularConsistentProblem, &[0.2, 0.3], &[0.0], "singular consistent");
     check_jacobian(&CubicProblem, &[0.6], &[0.2], "cubic");
+    check_jacobian(&NeutralSaddleProblem, &[0.4, 0.3], &[0.7], "neutral saddle");
+    check_jacobian(&Selkov, &[1.3, 0.4], &[0.5, 0.6], "Selkov");
 }
 
 #[test]
